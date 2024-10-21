@@ -139,7 +139,6 @@ class MainActivity2 : AppCompatActivity() {
                     val gameInfo = mapOf(
                         "title" to event.optString("title", "N/A"),
                         "date" to event.optString("start", "N/A"),
-                        "description" to event.optString("description", "N/A"),
                         "latitude" to latitude,
                         "longitude" to longitude
                     )
@@ -161,7 +160,6 @@ class MainActivity2 : AppCompatActivity() {
             val stringBuilder = StringBuilder()
             for ((index, game) in foundGames.withIndex()) {
                 stringBuilder.append("${index + 1}. ${game["title"]} on ${game["date"]}\n")
-                stringBuilder.append("   Description: ${game["description"]}\n")
                 stringBuilder.append("   Latitude: ${game["latitude"]}, Longitude: ${game["longitude"]}\n\n")
             }
             resultTextView.text = stringBuilder.toString()
