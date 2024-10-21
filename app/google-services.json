@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "803194108545",
+    "project_id": "xfactor-67cb1",
+    "storage_bucket": "xfactor-67cb1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:803194108545:android:9c793e3c0781f37e996b80",
+        "android_client_info": {
+          "package_name": "com.www.xfactor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDoQ8vNI-VFqm686cYozTJLWmJMO_tePpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
