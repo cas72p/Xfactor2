@@ -152,22 +152,43 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
     }
+    private val selectedGames = mutableSetOf<Map<String, String>>()
 
     // Function to search for games by team name
     private fun searchGameByTeam(teamName: String) {
         resultContainer.removeAllViews() // Clear previous search results
 
-        val foundGames = allGames.filter { it["title"]?.contains(teamName, ignoreCase = true) == true }
+        val foundGames = allGames.filter {
+            it["title"]?.contains(teamName, ignoreCase = true) == true &&
+                    it["latitude"]?.toDoubleOrNull()?.let { lat -> lat >= 7.0 && lat <= 84.0 } == true &&
+                    it["longitude"]?.toDoubleOrNull()?.let { lon -> lon >= -168.0 && lon <= -30.0 } == true
+        }
 
         if (foundGames.isNotEmpty()) {
             val limitedGames = foundGames.take(5) // Limit to the first 5 matches
             for (game in limitedGames) {
                 val gameButton = Button(this).apply {
                     text = "${game["title"]} on ${game["date"]}\nLat: ${game["latitude"]}, Lon: ${game["longitude"]}"
+                    // Set initial background color based on whether the game is already selected
+                    setBackgroundColor(
+                        if (selectedGames.contains(game))
+                            resources.getColor(android.R.color.holo_orange_light)
+                        else
+                            resources.getColor(android.R.color.darker_gray)
+                    )
                     setOnClickListener {
-                        Toast.makeText(this@MainActivity2, "Clicked on: ${game["title"]}", Toast.LENGTH_SHORT).show()
+                        if (selectedGames.contains(game)) {
+                            selectedGames.remove(game)
+                            setBackgroundColor(resources.getColor(android.R.color.darker_gray))
+                            Toast.makeText(this@MainActivity2, "Removed: ${game["title"]}", Toast.LENGTH_SHORT).show()
+                        } else {
+                            selectedGames.add(game)
+                            setBackgroundColor(resources.getColor(android.R.color.holo_orange_light))
+                            Toast.makeText(this@MainActivity2, "Added: ${game["title"]}", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
+
                 resultContainer.addView(gameButton)
             }
         } else {
@@ -177,6 +198,7 @@ class MainActivity2 : AppCompatActivity() {
             resultContainer.addView(noResultTextView)
         }
     }
+
 }
 
 
