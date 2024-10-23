@@ -136,8 +136,8 @@ class MainActivity2 : AppCompatActivity() {
                     val event = events.getJSONObject(i)
 
                     val locationArray = event.optJSONArray("location")
-                    val latitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(0).toString() else "N/A"
-                    val longitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(1).toString() else "N/A"
+                    val longitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(0).toString() else "N/A"
+                    val latitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(1).toString() else "N/A"
 
                     val gameInfo = mapOf(
                         "title" to event.optString("title", "N/A"),
