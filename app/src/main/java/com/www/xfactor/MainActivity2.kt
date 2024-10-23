@@ -2,8 +2,11 @@ package com.www.xfactor
 
 import android.os.AsyncTask
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +21,7 @@ import java.net.URL
 
 class MainActivity2 : AppCompatActivity() {
 
-    private lateinit var resultTextView: TextView
+    private lateinit var resultContainer: LinearLayout
     private lateinit var searchInput: EditText
     private lateinit var searchButton: Button
     private val allGames = mutableListOf<Map<String, String>>()
@@ -27,8 +30,8 @@ class MainActivity2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
 
-        // Reference to TextView, EditText, and Button
-        resultTextView = findViewById(R.id.result_text_view)
+        // Reference to views
+        resultContainer = findViewById(R.id.result_container)
         searchInput = findViewById(R.id.search_input)
         searchButton = findViewById(R.id.search_button)
 
@@ -120,7 +123,7 @@ class MainActivity2 : AppCompatActivity() {
             if (result != null && !result.startsWith("Error")) {
                 parseGameResults(result)
             } else {
-                resultTextView.text = "Error fetching data for $sportLabel"
+                Toast.makeText(this@MainActivity2, "Error fetching data for $sportLabel", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -144,28 +147,36 @@ class MainActivity2 : AppCompatActivity() {
                     )
                     allGames.add(gameInfo)
                 }
-                resultTextView.text = "Fetched ${allGames.size} games for $sportLabel."
             } catch (e: Exception) {
                 e.printStackTrace()
-                resultTextView.text = "Error parsing data for $sportLabel"
             }
         }
     }
 
     // Function to search for games by team name
     private fun searchGameByTeam(teamName: String) {
+        resultContainer.removeAllViews() // Clear previous search results
+
         val foundGames = allGames.filter { it["title"]?.contains(teamName, ignoreCase = true) == true }
 
         if (foundGames.isNotEmpty()) {
-            val stringBuilder = StringBuilder()
-            for ((index, game) in foundGames.withIndex()) {
-                stringBuilder.append("${index + 1}. ${game["title"]} on ${game["date"]}\n")
-                stringBuilder.append("   Latitude: ${game["latitude"]}, Longitude: ${game["longitude"]}\n\n")
+            val limitedGames = foundGames.take(5) // Limit to the first 5 matches
+            for (game in limitedGames) {
+                val gameButton = Button(this).apply {
+                    text = "${game["title"]} on ${game["date"]}\nLat: ${game["latitude"]}, Lon: ${game["longitude"]}"
+                    setOnClickListener {
+                        Toast.makeText(this@MainActivity2, "Clicked on: ${game["title"]}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                resultContainer.addView(gameButton)
             }
-            resultTextView.text = stringBuilder.toString()
         } else {
-            resultTextView.text = "No games found for the team '$teamName'."
+            val noResultTextView = TextView(this).apply {
+                text = "No games found for the team '$teamName'."
+            }
+            resultContainer.addView(noResultTextView)
         }
     }
 }
+
 
