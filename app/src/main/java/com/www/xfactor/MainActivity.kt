@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private fun configureNextButton() {
         val loginButton: Button = findViewById(R.id.login_button)
         loginButton.setOnClickListener {
-            val intent = Intent(this, MainActivity2::class.java)
+            val intent = Intent(this, MenuActivity::class.java)
             startActivity(intent)
         }
     }
