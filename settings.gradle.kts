@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "xfactor map"
+rootProject.name = "Xfactor"
 include(":app")
  

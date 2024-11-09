@@ -12,17 +12,29 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:theme="@style/Theme.Xfactor"
         android:theme="@style/Theme.XfactorMap"
         tools:targetApi="31">
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAKX41E7y4cxANoLQ-oNsjVc-sBFI5TNVE" />
-
+        <activity
+            android:name=".MenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".register"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity2"
+            android:exported="false" />
         <activity
             android:name=".map_activity"
             android:exported="true"
-            android:label="@string/app_name">
+            android:label="@string/app_name" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
