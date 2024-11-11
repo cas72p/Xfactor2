@@ -13,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Xfactor"
-        android:theme="@style/Theme.XfactorMap"
         tools:targetApi="31">
 
         <meta-data
