@@ -21,9 +21,17 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        navigateToMapActivity()
+
         // Configure the next button to switch to MainActivity2
         configureNextButton()
         configureRegButton()
+    }
+
+    private fun navigateToMapActivity() {
+        val intent = Intent(this,com.www.xfactor.xfactormap.map_activity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     private fun configureNextButton() {

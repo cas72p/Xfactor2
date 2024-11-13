@@ -1,4 +1,4 @@
-package com.example.xfactormap
+package com.www.xfactor.xfactormap
 
 import NWS
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.www.xfactor.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback

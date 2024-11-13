@@ -28,9 +28,8 @@
             android:name=".MainActivity2"
             android:exported="false" />
         <activity
-            android:name=".map_activity"
-            android:exported="true"
-            android:label="@string/app_name" />
+            android:name=".xfactormap.map_activity"
+            android:exported="true"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">
