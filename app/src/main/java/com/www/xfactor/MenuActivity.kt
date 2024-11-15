@@ -2,7 +2,9 @@ package com.www.xfactor
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,7 +26,7 @@ class MenuActivity : AppCompatActivity() {
 
         // Configure the buttons to switch to different features
         configureSearchButton()
-        //configureSavedButton() //TODO:: create page
+        configureSavedButton() //TODO:: create page
         //configureWeatherButton() //TODO:: create page
         //configureSettingsButton() //TODO:: create page
 
@@ -41,14 +43,15 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    //this takes you to your saved games
     private fun configureSavedButton() {
         val savedButton: Button = findViewById(R.id.saved_button)
         savedButton.setOnClickListener {
-            val intent = Intent(this, MenuActivity::class.java) //TODO:: ADD SAVED PAGE instead of menu page
+            val intent = Intent(this, SavedGames::class.java)
             startActivity(intent)
         }
     }
+
+
 
     //this takes you to the weather map
     private fun configureWeatherButton() {

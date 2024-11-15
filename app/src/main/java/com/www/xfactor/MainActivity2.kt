@@ -2,7 +2,6 @@ package com.www.xfactor
 
 import android.os.AsyncTask
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -12,6 +11,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -25,10 +26,17 @@ class MainActivity2 : AppCompatActivity() {
     private lateinit var searchInput: EditText
     private lateinit var searchButton: Button
     private val allGames = mutableListOf<Map<String, String>>()
+    private val selectedGames = mutableSetOf<Map<String, String>>()
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main2)
+
+        // Initialize Firebase Auth and Firestore
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         // Reference to views
         resultContainer = findViewById(R.id.result_container)
@@ -45,6 +53,9 @@ class MainActivity2 : AppCompatActivity() {
         // Configure back button
         configureBackButton()
 
+        // Fetch saved games from Firestore
+        loadSavedGames()
+
         // Trigger the searchGames API call when the activity starts
         fetchGamesForNext10Days("nfl")
         fetchGamesForNext10Days("baseball")
@@ -60,17 +71,40 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-    // Back button setup to return to the previous activity
+    // Load saved games from Firestore for the current user
+
+    private fun loadSavedGames() {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).collection("selectedGames")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val game = mapOf(
+                        "title" to (document.getString("title") ?: "N/A"),
+                        "date" to (document.getString("date") ?: "N/A"),
+                        "latitude" to (document.getString("latitude") ?: "N/A"),
+                        "longitude" to (document.getString("longitude") ?: "N/A")
+                    )
+                    selectedGames.add(game)
+                }
+                Toast.makeText(this, "Saved games loaded", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error loading saved games", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+    // Function to fetch games for the next 10 days
+    private fun fetchGamesForNext10Days(sportLabel: String) {
+        FetchGamesTask(sportLabel).execute()
+    }
+
     private fun configureBackButton() {
         val backButton: Button = findViewById(R.id.back_button)
         backButton.setOnClickListener {
             finish()
         }
-    }
-
-    // Function to fetch games for the next 10 days
-    private fun fetchGamesForNext10Days(sportLabel: String) {
-        FetchGamesTask(sportLabel).execute()
     }
 
     // AsyncTask to perform network operations in the background
@@ -89,7 +123,7 @@ class MainActivity2 : AppCompatActivity() {
                 val url: URL = URI.create(urlWithParams).toURL()
                 val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "GET"
-                connection.setRequestProperty("Authorization", "Bearer $apiKey") // Add Authorization header
+                connection.setRequestProperty("Authorization", "Bearer $apiKey")
 
                 val responseCode: Int = connection.responseCode
                 if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -119,7 +153,6 @@ class MainActivity2 : AppCompatActivity() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
 
-            // Update the games list with the API result
             if (result != null && !result.startsWith("Error")) {
                 parseGameResults(result)
             } else {
@@ -127,14 +160,12 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
 
-        // Parse the JSON response and add relevant games to the list
         private fun parseGameResults(result: String) {
             try {
                 val jsonObject = JSONObject(result)
                 val events = jsonObject.getJSONArray("results")
                 for (i in 0 until events.length()) {
                     val event = events.getJSONObject(i)
-
                     val locationArray = event.optJSONArray("location")
                     val longitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(0).toString() else "N/A"
                     val latitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(1).toString() else "N/A"
@@ -152,11 +183,9 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
     }
-    private val selectedGames = mutableSetOf<Map<String, String>>()
 
-    // Function to search for games by team name
     private fun searchGameByTeam(teamName: String) {
-        resultContainer.removeAllViews() // Clear previous search results
+        resultContainer.removeAllViews()
 
         val foundGames = allGames.filter {
             it["title"]?.contains(teamName, ignoreCase = true) == true &&
@@ -165,11 +194,10 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         if (foundGames.isNotEmpty()) {
-            val limitedGames = foundGames.take(5) // Limit to the first 5 matches
+            val limitedGames = foundGames.take(5)
             for (game in limitedGames) {
                 val gameButton = Button(this).apply {
                     text = "${game["title"]} on ${game["date"]}\nLat: ${game["latitude"]}, Lon: ${game["longitude"]}"
-                    // Set initial background color based on whether the game is already selected
                     setBackgroundColor(
                         if (selectedGames.contains(game))
                             resources.getColor(android.R.color.holo_orange_light)
@@ -177,18 +205,9 @@ class MainActivity2 : AppCompatActivity() {
                             resources.getColor(android.R.color.darker_gray)
                     )
                     setOnClickListener {
-                        if (selectedGames.contains(game)) {
-                            selectedGames.remove(game)
-                            setBackgroundColor(resources.getColor(android.R.color.darker_gray))
-                            Toast.makeText(this@MainActivity2, "Removed: ${game["title"]}", Toast.LENGTH_SHORT).show()
-                        } else {
-                            selectedGames.add(game)
-                            setBackgroundColor(resources.getColor(android.R.color.holo_orange_light))
-                            Toast.makeText(this@MainActivity2, "Added: ${game["title"]}", Toast.LENGTH_SHORT).show()
-                        }
+                        toggleGameSelection(game, this)
                     }
                 }
-
                 resultContainer.addView(gameButton)
             }
         } else {
@@ -199,6 +218,44 @@ class MainActivity2 : AppCompatActivity() {
         }
     }
 
-}
+    private fun toggleGameSelection(game: Map<String, String>, button: Button) {
+        if (selectedGames.contains(game)) {
+            selectedGames.remove(game)
+            deleteGameFromFirestore(game)
+            button.setBackgroundColor(resources.getColor(android.R.color.darker_gray))
+            Toast.makeText(this, "Removed: ${game["title"]}", Toast.LENGTH_SHORT).show()
+        } else {
+            selectedGames.add(game)
+            saveGameToFirestore(game)
+            button.setBackgroundColor(resources.getColor(android.R.color.holo_orange_light))
+            Toast.makeText(this, "Added: ${game["title"]}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    private fun saveGameToFirestore(game: Map<String, String>) {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).collection("selectedGames")
+            .document(game["title"] ?: "Untitled")
+            .set(game)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Game saved", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error saving game", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun deleteGameFromFirestore(game: Map<String, String>) {
+        val userId = auth.currentUser?.uid ?: return
+        db.collection("users").document(userId).collection("selectedGames")
+            .document(game["title"] ?: "Untitled")
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Game removed from saved games", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error removing game", Toast.LENGTH_SHORT).show()
+            }
+    }
+}
 

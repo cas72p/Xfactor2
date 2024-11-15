@@ -1,93 +1,80 @@
 package com.www.xfactor
-import android.util.Log
+
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import android.widget.EditText
-import android.widget.Toast
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.PreparedStatement
-import java.sql.SQLException
+import com.google.firebase.auth.FirebaseAuth
 
 class register : AppCompatActivity() {
+    private lateinit var email: EditText
+    private lateinit var password: EditText
+    private lateinit var registerButton: Button
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_register)
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
+
+        // Set up UI components
+        email = findViewById(R.id.username_reg)
+        password = findViewById(R.id.password_reg)
+        registerButton = findViewById(R.id.register_button)
+
+        // Set up the register button to handle user registration
+        registerButton.setOnClickListener {
+            val emailText = email.text.toString().trim()
+            val passwordText = password.text.toString().trim()
+
+            if (emailText.isNotEmpty() && passwordText.isNotEmpty()) {
+                registerUser(emailText, passwordText)
+            } else {
+                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Handle window insets for full-screen layout
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         configureBackButton()
     }
-    // Back button setup to return to the previous activity
-    private fun configureBackButton() {
-        // Database connection details
-        val jdbcUrl = "jdbc:mysql://x-factor.cnmyeqgwshz0.us-east-2.rds.amazonaws.com:3306/xFactor?useSSL=false&autoReconnect=true"
-        val dbUser = "admin"
-        val dbPassword = "X-Factor"
 
-        val emailEditText: EditText = findViewById(R.id.username_reg)
-        val passwordEditText: EditText = findViewById(R.id.password_reg)
-        val backButton: Button = findViewById(R.id.register_button)
-
-        backButton.setOnClickListener {
-            val email = emailEditText.text.toString()
-            val password = passwordEditText.text.toString()
-
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                // Attempt to add the user to the database
-                val success = addUserToDatabase(email, password, jdbcUrl, dbUser, dbPassword)
-
-                if (success) {
+    // Function to register a new user with Firebase Authentication
+    private fun registerUser(email: String, password: String) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Registration successful
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                    finish() // Finish the activity to go back
+                    finish() // Close registration activity
                 } else {
-                    Toast.makeText(this, "Failed to register user", Toast.LENGTH_SHORT).show()
+                    // Registration failed
+                    val errorMessage = task.exception?.message ?: "Registration failed"
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+                    Log.e("FirebaseAuth", "Error: $errorMessage")
                 }
-            } else {
-                Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show()
             }
-        }
     }
 
-    private fun addUserToDatabase(email: String, password: String, jdbcUrl: String, dbUser: String, dbPassword: String): Boolean {
-        var connection: Connection? = null
-        var preparedStatement: PreparedStatement? = null
-
-        return try {
-            // Establish connection to the database
-            connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPassword)
-
-            // Insert the new user into the database
-            val sql = "INSERT INTO User (username, password) VALUES (?, ?)"
-            preparedStatement = connection.prepareStatement(sql)
-            preparedStatement.setString(1, email)
-            preparedStatement.setString(2, password)
-
-            val rowsInserted = preparedStatement.executeUpdate()
-            rowsInserted > 0 // Return true if insertion was successful
-
-        } catch (e: SQLException) {
-            Log.e("Register", "SQL Exception: ${e.message}")
-            false
-        } catch (e: Exception) {
-            Log.e("Register", "Exception: ${e.message}")
-            false
-        } finally {
-            // Close resources
-            try {
-                preparedStatement?.close()
-                connection?.close()
-            } catch (e: SQLException) {
-                Log.e("Register", "Error closing connection: ${e.message}")
-            }
+    // Back button setup to return to the previous activity
+    private fun configureBackButton() {
+        val backButton: Button = findViewById(R.id.back_button)
+        backButton.setOnClickListener {
+            finish()
         }
     }
 }
-//git test
