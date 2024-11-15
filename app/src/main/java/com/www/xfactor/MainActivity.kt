@@ -44,6 +44,11 @@ class MainActivity : AppCompatActivity() {
         configureRegButton()
     }
 
+    private fun navigateToMapActivity() {
+        val intent = Intent(this,com.www.xfactor.xfactormap.map_activity::class.java)
+        startActivity(intent)
+        finish()
+    }
     private fun configureLoginButton() {
         loginButton.setOnClickListener {
             val email = emailField.text.toString().trim()
@@ -56,7 +61,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
     private fun loginUser(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
@@ -73,7 +77,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
-
     private fun configureRegButton() {
         registerButton.setOnClickListener {
             val intent = Intent(this, register::class.java)
