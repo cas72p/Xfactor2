@@ -43,7 +43,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-<<<<<<< HEAD
 
     // Explicit Protobuf version
     implementation("com.google.protobuf:protobuf-javalite:3.21.9")
@@ -57,10 +56,7 @@ dependencies {
         exclude(group = "com.google.protobuf", module = "protobuf-java")
     }
 
-
-=======
     implementation(libs.firebase.auth)
-    implementation(libs.mysqlConnector)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -75,7 +71,6 @@ dependencies {
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.maps.android:maps-compose:2.11.0")
     implementation("com.google.android.material:material:1.8.0")
->>>>>>> experimental
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
