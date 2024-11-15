@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.www.xfactor.xfactormap.map_activity
 
 //THIS IS BUILT TO HOLD BUTTONS TO TAKE YOU TO ALL FUNCTIONS IN THE APP
 class MenuActivity : AppCompatActivity() {
@@ -27,7 +28,7 @@ class MenuActivity : AppCompatActivity() {
         // Configure the buttons to switch to different features
         configureSearchButton()
         configureSavedButton() //TODO:: create page
-        //configureWeatherButton() //TODO:: create page
+        configureWeatherButton() //TODO:: create page
         //configureSettingsButton() //TODO:: create page
 
         // Configure back button
@@ -57,7 +58,7 @@ class MenuActivity : AppCompatActivity() {
     private fun configureWeatherButton() {
         val weatherButton: Button = findViewById(R.id.weather_button)
         weatherButton.setOnClickListener {
-            val intent = Intent(this, MenuActivity::class.java) //TODO:: ADD WEATHER PAGE instead of menu page
+            val intent = Intent(this, map_activity::class.java) //TODO:: ADD WEATHER PAGE instead of menu page
             startActivity(intent)
         }
     }
