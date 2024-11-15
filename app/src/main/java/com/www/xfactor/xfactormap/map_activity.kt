@@ -1,6 +1,7 @@
 package com.www.xfactor.xfactormap
 
 import NWS
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.www.xfactor.MenuActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,6 +46,12 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
 
         // Retrieve and display weather data
         getWeather()
+
+        findViewById<ImageView>(R.id.backButton).setOnClickListener {
+            val intent = Intent(this, MenuActivity::class.java)
+            startActivity(intent)
+            finish()  // Finish the current activity so it doesn't remain in the back stack
+        }
     }
 
     // Callback when the Google Map is ready for use
