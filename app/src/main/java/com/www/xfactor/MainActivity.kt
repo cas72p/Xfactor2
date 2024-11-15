@@ -21,8 +21,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        navigateToMapActivity()
-
         // Configure the next button to switch to MainActivity2
         configureNextButton()
         configureRegButton()
