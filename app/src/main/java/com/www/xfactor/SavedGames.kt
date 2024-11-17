@@ -1,5 +1,6 @@
 package com.www.xfactor
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -39,10 +40,10 @@ class SavedGames : AppCompatActivity() {
                 for (document in documents) {
                     val title = document.getString("title") ?: "N/A"
                     val date = document.getString("date") ?: "N/A"
-                    val latitude = document.getString("latitude") ?: "N/A"
-                    val longitude = document.getString("longitude") ?: "N/A"
+                    val latitude = document.getString("latitude")?.toDoubleOrNull() ?: 0.0
+                    val longitude = document.getString("longitude")?.toDoubleOrNull() ?: 0.0
 
-                    // Display each game
+                    // Display each game and make it clickable
                     addGameToView(title, date, latitude, longitude)
                 }
                 if (documents.isEmpty) {
@@ -54,11 +55,21 @@ class SavedGames : AppCompatActivity() {
             }
     }
 
-    private fun addGameToView(title: String, date: String, latitude: String, longitude: String) {
+    private fun addGameToView(title: String, date: String, latitude: Double, longitude: Double) {
         val gameTextView = TextView(this).apply {
             text = "$title on $date\nLocation: ($latitude, $longitude)"
             textSize = 16f
             setPadding(16, 16, 16, 16)
+
+            // Set click listener to navigate to map_activity with location data
+            setOnClickListener {
+                val intent = Intent(this@SavedGames,com.www.xfactor.xfactormap.map_activity::class.java).apply {
+                    putExtra("latitude", latitude)
+                    putExtra("longitude", longitude)
+                    putExtra("title", title)
+                }
+                startActivity(intent)
+            }
         }
         gamesContainer.addView(gameTextView)
     }

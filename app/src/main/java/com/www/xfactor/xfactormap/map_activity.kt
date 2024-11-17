@@ -9,14 +9,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.www.xfactor.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.www.xfactor.MenuActivity
+import com.www.xfactor.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,9 +31,19 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
     // NWS instance for accessing weather data
     private val nws = NWS()
 
+    // Variables for dynamic coordinates
+    private var latitude: Double? = null
+    private var longitude: Double? = null
+    private var title: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.map_layout)
+
+        // Retrieve dynamic location data from the Intent
+        latitude = intent.getDoubleExtra("latitude", 39.0997) // Default: Kansas City
+        longitude = intent.getDoubleExtra("longitude", -94.4840) // Default: Kansas City
+        title = intent.getStringExtra("title") ?: "Selected Location"
 
         // Initialize the bottom sheet and set it to a collapsed state initially
         val bottomSheet = findViewById<View>(R.id.bottomSheet)
@@ -45,7 +56,11 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         // Retrieve and display weather data
-        getWeather()
+        latitude?.let { lat ->
+            longitude?.let { lon ->
+                getWeather(lat, lon)
+            }
+        }
 
         findViewById<ImageView>(R.id.backButton).setOnClickListener {
             val intent = Intent(this, MenuActivity::class.java)
@@ -57,31 +72,36 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
     // Callback when the Google Map is ready for use
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+
+        latitude?.let { lat ->
+            longitude?.let { lon ->
+                val location = LatLng(lat, lon)
+
+                // Center the map at the provided coordinates and add a marker
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 15f))
+                map.addMarker(
+                    MarkerOptions()
+                        .position(location)
+                        .title(title)
+                )
+            }
+        }
     }
 
     // Function to fetch weather data and update UI
-    private fun getWeather() {
-        // Hardcoded coordinates for Kansas City
-        val lat = 39.0997
-        val lon = -94.4840
-
-        // Launch a coroutine for asynchronous weather data fetching
+    private fun getWeather(lat: Double, lon: Double) {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 // Get grid point data for the specified coordinates
                 val gridPointResponse = nws.getGridPoint(lat, lon)
 
                 if (gridPointResponse != null) {
-                    // Update the camera position on the main thread
-                    withContext(Dispatchers.Main) {
-                        val desiredLocation = LatLng(lat, lon)
-                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(desiredLocation, 15f))
-                    }
-
                     // Fetch forecast data based on the grid point information
-                    val forecast = nws.getForecast(gridPointResponse.properties.gridId,
+                    val forecast = nws.getForecast(
+                        gridPointResponse.properties.gridId,
                         gridPointResponse.properties.gridX,
-                        gridPointResponse.properties.gridY)
+                        gridPointResponse.properties.gridY
+                    )
 
                     withContext(Dispatchers.Main) {
                         if (forecast != null && forecast.isNotEmpty()) {
@@ -120,7 +140,7 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
                 }
             } catch (e: Exception) {
                 // Log any errors and update the UI with an error message
-                Log.e("MainActivity", "Failed to get weather data", e)
+                Log.e("map_activity", "Failed to get weather data", e)
                 withContext(Dispatchers.Main) {
                     findViewById<TextView>(R.id.textViewWeather).text = "Failed to get weather data: ${e.message}"
                     bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
