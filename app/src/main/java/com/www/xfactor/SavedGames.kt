@@ -56,14 +56,14 @@ class SavedGames : AppCompatActivity() {
     }
 
     private fun addGameToView(title: String, date: String, latitude: Double, longitude: Double) {
-        val gameTextView = TextView(this).apply {
-            text = "$title on $date\nLocation: ($latitude, $longitude)"
-            textSize = 16f
-            setPadding(16, 16, 16, 16)
-
-            // Set click listener to navigate to map_activity with location data
+        // Display game info on custom game card item
+        val gameCard = layoutInflater.inflate(R.layout.game_item_card, gamesContainer, false).apply {
+            findViewById<TextView>(R.id.gameTitle).text = title
+            findViewById<TextView>(R.id.gameDate).text = date
+            findViewById<TextView>(R.id.gameLocation).text = "Location: ($latitude, $longitude)"
+            // If card is clicked, open the weather map with lat, lon and title
             setOnClickListener {
-                val intent = Intent(this@SavedGames,com.www.xfactor.xfactormap.map_activity::class.java).apply {
+                val intent = Intent(this@SavedGames, com.www.xfactor.xfactormap.map_activity::class.java).apply {
                     putExtra("latitude", latitude)
                     putExtra("longitude", longitude)
                     putExtra("title", title)
@@ -71,6 +71,7 @@ class SavedGames : AppCompatActivity() {
                 startActivity(intent)
             }
         }
-        gamesContainer.addView(gameTextView)
+        gamesContainer.addView(gameCard)
     }
 }
+
