@@ -28,7 +28,7 @@
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#000000"
+        android:background="#80000000"
         android:orientation="vertical"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         android:padding="16dp">
@@ -44,10 +44,11 @@
             <!-- Weather Icon -->
             <ImageView
                 android:id="@+id/weatherIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/forecast_icon"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="-4dp"/>
 
             <!-- Weather Text -->
             <TextView
@@ -70,10 +71,11 @@
             <!-- Temperature Icon -->
             <ImageView
                 android:id="@+id/temperatureIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/temp_icon"
-                android:layout_marginEnd="8dp" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/thermometer_1"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="-4dp"/>
 
             <!-- Temperature Text -->
             <TextView
@@ -96,10 +98,11 @@
             <!-- Wind Icon -->
             <ImageView
                 android:id="@+id/windIcon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/wind_speed_icon"
-                android:layout_marginEnd="8dp" />
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/wind_white"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="-4dp"/>
 
             <!-- Wind Text -->
             <TextView
@@ -109,6 +112,32 @@
                 android:text="Wind Speed"
                 android:textColor="#FFFFFF"
                 android:textSize="16sp" />
+        </LinearLayout>
+
+        <!-- Game Selector -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Label for Spinner -->
+            <TextView
+                android:id="@+id/gameSelectorLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select Game:"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Spinner for Game Selection -->
+            <Spinner
+                android:id="@+id/gameSelectorSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#95FFFFFF"
+                />
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

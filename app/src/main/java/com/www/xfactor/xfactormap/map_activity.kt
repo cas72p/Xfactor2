@@ -21,15 +21,26 @@ import com.www.xfactor.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 
 class map_activity : AppCompatActivity(), OnMapReadyCallback {
 
+    // Game class
+    data class Game(val name: String, val latitude: Double, val longitude: Double)
     // Bottom sheet for displaying weather info
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
     // Google Map instance
     private lateinit var map: GoogleMap
     // NWS instance for accessing weather data
     private val nws = NWS()
+    // Firebase stuff
+    private lateinit var db: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
 
     // Variables for dynamic coordinates
     private var latitude: Double? = null
@@ -39,6 +50,83 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.map_layout)
+
+        // Initialize Firebase Auth and Firestore
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
+        // Arrays of game objects and game names for spinner display
+        val temporaryOptions = mutableListOf<Game>()
+        val gameNames = mutableListOf<String>()
+        gameNames.add(0,"Select a game:") // Placeholder to avoid default selection
+        // Firebase stuff
+        val userId = auth.currentUser?.uid ?: return
+
+        // Fetching info for games and initializing the spinner
+        db.collection("users").document(userId).collection("selectedGames")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val title = document.getString("title") ?: "Empty Name"
+                    val date = document.getString("date") ?: "N/A"
+                    val latitude = document.getString("latitude") ?: "0.0"
+                    val longitude = document.getString("longitude") ?: "0.0"
+                    val lat = latitude.toDoubleOrNull() ?: 0.0
+                    val lon = longitude.toDoubleOrNull() ?: 0.0
+                    // Add games to the list
+                    if (lat != 0.0 && lon != 0.0){
+                        val newGame = Game(title, lat, lon)
+                        temporaryOptions.add(newGame)
+                        gameNames.add(title)
+                    }
+                }
+                // Spinner setup
+                val gameSelectorSpinner: Spinner = findViewById(R.id.gameSelectorSpinner)
+                val adapter = ArrayAdapter(
+                    this,
+                    android.R.layout.simple_spinner_item, // Layout for each item
+                    gameNames // Data source
+                )
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // Drop-down view style
+                gameSelectorSpinner.adapter = adapter
+                gameSelectorSpinner.setSelection(0)
+                gameSelectorSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>,
+                        view: View,
+                        position: Int,
+                        id: Long
+                    ) {
+                        if (position == 0){
+                            return
+                        }
+                        val selectedOption = parent.getItemAtPosition(position).toString()
+                        val selectedGame = temporaryOptions[position-1]
+                        // Call weather subroutine again on new coordinates
+                        Toast.makeText(this@map_activity, "Selected $selectedOption", Toast.LENGTH_SHORT).show()
+                        val lat = selectedGame.latitude
+                        val lon = selectedGame.longitude
+                        val nameOfTheGame = selectedGame.name
+                        getWeather(lat, lon)
+                        val desiredLocation = LatLng(lat, lon)
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(desiredLocation, 15f))
+                        map.addMarker(
+                            MarkerOptions()
+                                .position(desiredLocation)
+                                .title(nameOfTheGame)
+                        )
+
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>) {
+                        // Handle the case where no item is selected, if needed
+                    }
+                }
+                if (documents.isEmpty) {
+                    Toast.makeText(this, "No saved games found", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to load saved games", Toast.LENGTH_SHORT).show()
+            }
 
         // Retrieve dynamic location data from the Intent
         latitude = intent.getDoubleExtra("latitude", 39.0997) // Default: Kansas City
@@ -120,8 +208,8 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
 
                             // Set weather icons
                             findViewById<ImageView>(R.id.weatherIcon).setImageResource(R.drawable.forecast_icon)
-                            findViewById<ImageView>(R.id.temperatureIcon).setImageResource(R.drawable.temp_icon)
-                            findViewById<ImageView>(R.id.windIcon).setImageResource(R.drawable.wind_speed_icon)
+                            findViewById<ImageView>(R.id.temperatureIcon).setImageResource(R.drawable.thermometer_1)
+                            findViewById<ImageView>(R.id.windIcon).setImageResource(R.drawable.wind_white)
 
                             // Expand the bottom sheet to display weather details
                             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
