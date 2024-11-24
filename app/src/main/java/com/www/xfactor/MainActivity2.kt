@@ -112,7 +112,7 @@ class MainActivity2 : AppCompatActivity() {
 
         override fun doInBackground(vararg params: Void?): String? {
             val apiUrl = "https://api.predicthq.com/v1/events/"
-            val apiKey = "zGDhh1uVyp0xIMXdiOAWg_UZV3xy6WX5tYtXugwy"
+            val apiKey = "8KvJVVPWmb4v5IhI-QQId8Ys38fhC01mEoXaOLAv"
             var response: String? = null
 
             try {
