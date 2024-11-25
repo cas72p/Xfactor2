@@ -169,12 +169,14 @@ class MainActivity2 : AppCompatActivity() {
                     val locationArray = event.optJSONArray("location")
                     val longitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(0).toString() else "N/A"
                     val latitude = if (locationArray != null && locationArray.length() == 2) locationArray.getDouble(1).toString() else "N/A"
+                    val country = event.optString("country", "N/A") // Extract country field
 
                     val gameInfo = mapOf(
                         "title" to event.optString("title", "N/A"),
                         "date" to event.optString("start", "N/A"),
                         "latitude" to latitude,
-                        "longitude" to longitude
+                        "longitude" to longitude,
+                        "country" to country
                     )
                     allGames.add(gameInfo)
                 }
@@ -182,16 +184,22 @@ class MainActivity2 : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+
     }
 
     private fun searchGameByTeam(teamName: String) {
         resultContainer.removeAllViews()
 
-        val foundGames = allGames.filter {
-            it["title"]?.contains(teamName, ignoreCase = true) == true &&
-                    it["latitude"]?.toDoubleOrNull()?.let { lat -> lat >= 7.0 && lat <= 84.0 } == true &&
-                    it["longitude"]?.toDoubleOrNull()?.let { lon -> lon >= -168.0 && lon <= -30.0 } == true
+        val foundGames = allGames.filter { game ->
+            val title = game["title"] as? String
+            val country = game["country"] as? String
+
+
+            title?.contains(teamName, ignoreCase = true) == true &&
+                    country == "US"
         }
+
+
 
         if (foundGames.isNotEmpty()) {
             val limitedGames = foundGames.take(5)
