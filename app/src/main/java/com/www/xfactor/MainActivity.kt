@@ -43,12 +43,6 @@ class MainActivity : AppCompatActivity() {
         configureLoginButton()
         configureRegButton()
     }
-
-    private fun navigateToMapActivity() {
-        val intent = Intent(this,com.www.xfactor.xfactormap.map_activity::class.java)
-        startActivity(intent)
-        finish()
-    }
     private fun configureLoginButton() {
         loginButton.setOnClickListener {
             val email = emailField.text.toString().trim()

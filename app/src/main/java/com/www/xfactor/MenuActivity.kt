@@ -1,16 +1,21 @@
 package com.www.xfactor
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.gms.maps.model.LatLng
 import com.www.xfactor.xfactormap.map_activity
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,11 +24,19 @@ class MenuActivity : AppCompatActivity() {
 
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    companion object {
+        const val LOCATION_PERMISSION_REQUEST_CODE = 4589
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_menu)
+
+        // Initialize the FusedLocationProviderClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Apply window insets for edge-to-edge UI
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -37,8 +50,8 @@ class MenuActivity : AppCompatActivity() {
 
         // Configure the buttons to switch to different features
         configureSearchButton()
-        configureSavedButton() // TODO: create page
-        configureWeatherButton() // TODO: create page
+        configureSavedButton()
+        configureWeatherButton()
         // configureSettingsButton() // TODO: create page
 
         // Configure back button
@@ -86,7 +99,6 @@ class MenuActivity : AppCompatActivity() {
             }
     }
 
-
     private fun configureSearchButton() {
         val searchButton: Button = findViewById(R.id.search_button)
         searchButton.setOnClickListener {
@@ -106,11 +118,53 @@ class MenuActivity : AppCompatActivity() {
     private fun configureWeatherButton() {
         val weatherButton: Button = findViewById(R.id.weather_button)
         weatherButton.setOnClickListener {
-            val intent = Intent(this, map_activity::class.java) // TODO: ADD WEATHER PAGE instead of menu page
-            startActivity(intent)
+            // Ask user for location
+            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            } else {
+                loadUserLocation()
+            }
         }
     }
 
+    // Override the permission results to continue as normal if not met
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed to load user location
+                loadUserLocation()
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun loadUserLocation() {
+        fusedLocationClient.lastLocation
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful && task.result != null) {
+                    val location = task.result
+                    val userLatLng = LatLng(location.latitude, location.longitude)
+
+                    // Pass the location to map_activity
+                    val intent = Intent(this, map_activity::class.java).apply {
+                        putExtra("latitude", userLatLng.latitude)
+                        putExtra("longitude", userLatLng.longitude)
+                    }
+                    startActivity(intent)
+                } else {
+                    Log.e("loadUserLocation", "Failed to get location.")
+                    Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener {
+                Log.e("loadUserLocation", "Location retrieval error: ${it.message}")
+                Toast.makeText(this, "Failed to retrieve location", Toast.LENGTH_SHORT).show()
+            }
+    }
 
     private fun configureSettingsButton() {
         val settingsButton: Button = findViewById(R.id.settings_button)
@@ -120,7 +174,6 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-
     // TODO: MAKE SURE YOU'RE ACTUALLY LOGGED OUT OF YOUR ACCOUNT
     private fun configureLogoutButton() {
         val logoutButton: Button = findViewById(R.id.logout_button)
@@ -129,3 +182,4 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 }
+
