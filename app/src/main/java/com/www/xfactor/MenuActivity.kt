@@ -141,6 +141,7 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
+    //Function to check permission and return lon and lat
     @SuppressLint("MissingPermission")
     private fun loadUserLocation() {
         fusedLocationClient.lastLocation
