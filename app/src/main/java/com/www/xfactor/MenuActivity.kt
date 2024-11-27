@@ -52,7 +52,7 @@ class MenuActivity : AppCompatActivity() {
         configureSearchButton()
         configureSavedButton()
         configureWeatherButton()
-        // configureSettingsButton() // TODO: create page
+        configureSettingsButton()
 
         // Configure back button
         configureLogoutButton()
@@ -127,6 +127,15 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
+    private fun configureSettingsButton() {
+        val settingsButton: Button = findViewById(R.id.settings_button)
+        settingsButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java) //
+            startActivity(intent)
+            finish()
+        }
+    }
+
     // Override the permission results to continue as normal if not met
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -165,14 +174,6 @@ class MenuActivity : AppCompatActivity() {
                 Log.e("loadUserLocation", "Location retrieval error: ${it.message}")
                 Toast.makeText(this, "Failed to retrieve location", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    private fun configureSettingsButton() {
-        val settingsButton: Button = findViewById(R.id.settings_button)
-        settingsButton.setOnClickListener {
-            val intent = Intent(this, MenuActivity::class.java) // TODO: ADD SETTINGS PAGE instead of menu page
-            startActivity(intent)
-        }
     }
 
     // TODO: MAKE SURE YOU'RE ACTUALLY LOGGED OUT OF YOUR ACCOUNT
