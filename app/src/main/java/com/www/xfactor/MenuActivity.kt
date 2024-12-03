@@ -180,7 +180,8 @@ class MenuActivity : AppCompatActivity() {
     private fun configureLogoutButton() {
         val logoutButton: Button = findViewById(R.id.logout_button)
         logoutButton.setOnClickListener {
-            finish()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }

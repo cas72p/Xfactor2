@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var passwordField: EditText
     private lateinit var loginButton: Button
     private lateinit var registerButton: Button
+    private lateinit var resetButton: Button
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         passwordField = findViewById(R.id.password_input)  // EditText for password
         loginButton = findViewById(R.id.login_button)
         registerButton = findViewById(R.id.reg_button)
+        resetButton = findViewById(R.id.reset_button)
 
         // Apply window insets for edge-to-edge UI
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -42,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         // Set up button listeners
         configureLoginButton()
         configureRegButton()
+        configureResetButton()
     }
     private fun configureLoginButton() {
         loginButton.setOnClickListener {
@@ -74,6 +77,12 @@ class MainActivity : AppCompatActivity() {
     private fun configureRegButton() {
         registerButton.setOnClickListener {
             val intent = Intent(this, register::class.java)
+            startActivity(intent)
+        }
+    }
+    private fun configureResetButton() {
+        resetButton.setOnClickListener {
+            val intent = Intent(this, passwordReset::class.java)
             startActivity(intent)
         }
     }
