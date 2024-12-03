@@ -253,6 +253,7 @@ class MainActivity2 : AppCompatActivity() {
             }
     }
 
+
     private fun deleteGameFromFirestore(game: Map<String, String>) {
         val userId = auth.currentUser?.uid ?: return
         db.collection("users").document(userId).collection("selectedGames")
