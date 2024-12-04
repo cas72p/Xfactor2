@@ -9,34 +9,30 @@
 
     <ImageView
         android:id="@+id/menu_background_image"
-        android:layout_width="10000dp"
-        android:layout_height="wrap_content"
+        android:layout_width="15000dp"
+        android:layout_height="950dp"
         android:adjustViewBounds="false"
         android:cropToPadding="false"
-        android:rotation="180"
+        android:rotation="360"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.478"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/menu_background" />
 
     <ToggleButton
         android:id="@+id/map_mode"
-        android:layout_width="388dp"
-        android:layout_height="64dp"
-        android:layout_marginEnd="5018dp"
+        android:layout_width="349dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="16dp"
         android:layout_marginBottom="555dp"
-        android:textColor="#FFFFFF"
         android:background="#000000"
+        android:textColor="#FFFFFF"
         android:textOff="Map Dark Mode: Off"
         android:textOn="Map Dark Mode: On"
-        app:layout_constraintBottom_toBottomOf="@+id/menu_background_image"
-        app:layout_constraintEnd_toEndOf="@+id/menu_background_image"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.91" />
+        app:layout_constraintVertical_bias="0.684" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
