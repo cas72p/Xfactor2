@@ -61,17 +61,18 @@ class SavedGames : AppCompatActivity() {
             findViewById<TextView>(R.id.gameTitle).text = title
             findViewById<TextView>(R.id.gameDate).text = date
             findViewById<TextView>(R.id.gameLocation).text = "Location: ($latitude, $longitude)"
-            // If card is clicked, open the weather map with lat, lon and title
+            // If card is clicked, open the weather map with lat, lon, title, and date
             setOnClickListener {
                 val intent = Intent(this@SavedGames, com.www.xfactor.xfactormap.map_activity::class.java).apply {
                     putExtra("latitude", latitude)
                     putExtra("longitude", longitude)
                     putExtra("title", title)
+                    putExtra("date", date)
                 }
                 startActivity(intent)
             }
         }
-        gamesContainer.addView(gameCard)
+    gamesContainer.addView(gameCard)
     }
 }
 

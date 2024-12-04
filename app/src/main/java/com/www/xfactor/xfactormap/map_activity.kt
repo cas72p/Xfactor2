@@ -27,6 +27,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.*
 
 class map_activity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -45,6 +48,7 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
     // Variables for dynamic coordinates
     private var latitude: Double? = null
     private var longitude: Double? = null
+    private var target_date: String = "No date provided"
     private var title: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,6 +135,7 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
         // Retrieve dynamic location data from the Intent
         latitude = intent.getDoubleExtra("latitude", 39.0997) // Default: Kansas City
         longitude = intent.getDoubleExtra("longitude", -94.4840) // Default: Kansas City
+        target_date = intent.getStringExtra("date") ?: "No date provided"
         title = intent.getStringExtra("title") ?: "Selected Location"
 
         // Initialize the bottom sheet and set it to a collapsed state initially
@@ -178,6 +183,24 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
 
     // Function to fetch weather data and update UI
     private fun getWeather(lat: Double, lon: Double) {
+        var wanted_forecast = 0
+        val calendar = Calendar.getInstance()
+        val currentDate = calendar.time
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formattedDate = dateFormat.format(currentDate)
+        Log.d("Current date:", formattedDate)
+        Log.d("Target date:", target_date)
+
+        if (target_date != "No date provided") {
+            val current_day = formattedDate.substring(8,10).toInt()
+            val target_day = target_date.substring(8,10).toInt()
+            if ((target_day - current_day) >= 7)
+                wanted_forecast = 6
+            else {
+                wanted_forecast = target_day - current_day
+            }
+        }
+
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 // Get grid point data for the specified coordinates
@@ -194,7 +217,7 @@ class map_activity : AppCompatActivity(), OnMapReadyCallback {
                     withContext(Dispatchers.Main) {
                         if (forecast != null && forecast.isNotEmpty()) {
                             // Retrieve the first forecast item
-                            val currentWeather = forecast[0]
+                            val currentWeather = forecast[wanted_forecast]
 
                             // Extract weather details or set default values
                             val weatherText = currentWeather.detailedForecast ?: "N/A"
